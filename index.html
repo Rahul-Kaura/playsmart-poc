@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PlaySmart Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one column "court" — a home screen, a step-by-step lesson, a finish screen. Big tap targets, one idea per screen. */
+:root{
+  --sky:#0EA5E9; --sky-ink:#0369A1; --sky-soft:#E0F2FE;
+  --court:#F97316; --court-soft:#FFEDD5;
+  --win:#16A34A; --win-soft:#DCFCE7; --miss:#E11D48; --miss-soft:#FFE4E6;
+  --bg:#F3F9FD; --card:#FFFFFF; --ink:#0F2A3D; --muted:#557085; --line:#D4E6F1;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --r:22px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --sky:#38BDF8; --sky-ink:#7DD3FC; --sky-soft:#0C3550; --court:#FB923C; --court-soft:#3A2210;
+  --win:#4ADE80; --win-soft:#0F3320; --miss:#FB7185; --miss-soft:#3D1420;
+  --bg:#0B1A26; --card:#12263A; --ink:#E6F2FA; --muted:#93AFC4; --line:#1F3B53; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sky:#38BDF8; --sky-ink:#7DD3FC; --sky-soft:#0C3550; --court:#FB923C; --court-soft:#3A2210;
+  --win:#4ADE80; --win-soft:#0F3320; --miss:#FB7185; --miss-soft:#3D1420;
+  --bg:#0B1A26; --card:#12263A; --ink:#E6F2FA; --muted:#93AFC4; --line:#1F3B53; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:860px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--court);outline-offset:3px;border-radius:12px}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.35rem;color:var(--ink);background:none;border:0;padding:0}
+.logo span b{color:var(--sky)}
+.pill{font-weight:800;font-size:.85rem;background:var(--win-soft);color:var(--win);padding:6px 12px;border-radius:999px;white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;
+  font-family:var(--display);font-weight:700;font-size:1.2rem;padding:14px 28px;min-height:56px;
+  background:var(--court);color:#fff;box-shadow:0 5px 0 color-mix(in srgb,var(--court) 60%,#000);transition:transform .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 color-mix(in srgb,var(--court) 60%,#000)}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;padding-block:20px 36px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.5rem);font-weight:800}
+.hero h1 em{font-style:normal;color:var(--court)}
+.hero p{color:var(--muted);font-size:1.15rem;margin-top:14px;max-width:34ch}
+.hero .cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:24px}
+.hero small{color:var(--muted);font-weight:700}
+.statcard{background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:20px;transform:rotate(2deg)}
+.statcard .tag{font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.statcard .name{font-family:var(--display);font-size:1.4rem;font-weight:700;margin-top:4px}
+.statrow{display:flex;justify-content:space-between;padding:8px 0;border-top:2px dashed var(--line);font-variant-numeric:tabular-nums}
+.statrow:first-of-type{border-top:0}
+.statrow b{font-family:var(--display);font-size:1.2rem}
+.statcard .math{margin-top:10px;background:var(--sky-soft);color:var(--sky-ink);border-radius:14px;padding:10px 12px;font-weight:800;text-align:center}
+
+/* sections */
+.sec{padding-block:24px}
+.sec h2{font-size:1.8rem;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat{background:var(--card);border-radius:var(--r);padding:20px;border:2px solid var(--line)}
+.feat .ico{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;margin-bottom:10px;font-family:var(--display);font-weight:800;font-size:1.3rem}
+.feat h3{font-size:1.2rem;margin-bottom:4px}
+.feat p{color:var(--muted);font-size:.98rem}
+
+.lessonlist{display:grid;gap:12px}
+.lrow{display:flex;align-items:center;gap:16px;background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.lrow.free{border-color:var(--court);background:var(--court-soft)}
+.lrow .num{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;background:var(--sky-soft);color:var(--sky-ink)}
+.lrow.free .num{background:var(--court);color:#fff}
+.lrow .t{flex:1;min-width:0}
+.lrow .t b{font-family:var(--display);font-size:1.15rem;display:block}
+.lrow .t span{color:var(--muted);font-size:.92rem}
+.soon{font-size:.8rem;font-weight:800;color:var(--muted);background:var(--bg);border:2px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.parent{background:var(--sky-soft);border-radius:var(--r);padding:22px;display:grid;gap:8px}
+.parent h3{font-size:1.3rem;color:var(--sky-ink)}
+
+/* lesson */
+.progress{display:flex;gap:6px;margin-block:4px 18px}
+.progress i{flex:1;height:10px;border-radius:99px;background:var(--line)}
+.progress i.on{background:var(--sky)}
+.stage{background:var(--card);border:2px solid var(--line);border-radius:28px;padding:clamp(20px,4vw,36px);display:grid;gap:18px}
+.coach{display:flex;gap:14px;align-items:flex-start}
+.coach svg{flex:none}
+.bubble{background:var(--sky-soft);color:var(--ink);border-radius:20px;border-top-left-radius:6px;padding:14px 16px;font-size:1.08rem;min-width:0}
+.bubble b{color:var(--sky-ink)}
+.stage h2{font-size:clamp(1.6rem,4.5vw,2.2rem)}
+.balls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.ball{width:62px;height:62px;border-radius:50%;border:3px solid var(--line);background:var(--bg);display:grid;place-items:center;transition:transform .15s,background .15s}
+.ball.made{background:var(--court);border-color:var(--court)}
+.ball.miss{background:var(--miss-soft);border-color:var(--miss)}
+.ball svg{width:34px;height:34px}
+button.ball:hover{transform:scale(1.06)}
+.ball.pop{animation:pop .3s}
+@keyframes pop{50%{transform:scale(1.2)}}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.frac .bar{width:100%;height:5px;background:currentColor;border-radius:3px;margin:4px 0}
+.readout{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:24px;background:var(--bg);border-radius:20px;padding:18px}
+.readout .eq{font-family:var(--display);font-size:2rem;color:var(--muted)}
+.readout .pct{font-family:var(--display);font-weight:800;font-size:2.6rem;color:var(--court);font-variant-numeric:tabular-nums}
+.readout .lbl{font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+.vocab{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vocab div{background:var(--bg);border-radius:16px;padding:14px}
+.vocab b{font-family:var(--display);font-size:1.15rem;display:block}
+.vocab span{color:var(--muted);font-size:.95rem}
+.hint{color:var(--muted);text-align:center;font-weight:700}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{border:3px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:16px;min-height:64px;font-family:var(--display);font-weight:700;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.opt:hover:not(:disabled){border-color:var(--sky)}
+.opt.right{border-color:var(--win);background:var(--win-soft);color:var(--win)}
+.opt.wrong{border-color:var(--miss);background:var(--miss-soft);color:var(--miss)}
+.opt:disabled{cursor:default}
+.feedback{border-radius:18px;padding:14px 16px;font-weight:700}
+.feedback.good{background:var(--win-soft);color:var(--win)}
+.feedback.bad{background:var(--miss-soft);color:var(--miss)}
+.feedback span{display:block;color:var(--ink);font-weight:600;margin-top:4px}
+.nav{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-weight:800}
+.stars{display:flex;gap:4px}
+.stars svg{width:26px;height:26px}
+
+/* finish */
+.done{text-align:center;justify-items:center}
+.done .big{font-family:var(--display);font-size:3.4rem;font-weight:800;color:var(--court);line-height:1}
+.badge{width:140px;height:140px}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:20}
+
+@media (max-width:700px){
+  .hero{grid-template-columns:1fr}
+  .statcard{transform:none}
+  .grid3{grid-template-columns:1fr}
+  .opts,.vocab{grid-template-columns:1fr}
+  .ball{width:52px;height:52px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <button class="logo" id="homeBtn" aria-label="PlaySmart Academy home">
+      <svg width="38" height="38" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="var(--court)"/><path d="M2 20h36M20 2v36M7 7c7 6 7 20 0 26M33 7c-7 6-7 20 0 26" stroke="#7C2D12" stroke-width="2" fill="none"/></svg>
+      <span>Play<b>Smart</b></span>
+    </button>
+    <span class="pill">Free lesson · no sign-up</span>
+  </header>
+
+  <!-- HOME -->
+  <main id="home">
+    <section class="hero">
+      <div>
+        <h1>Math class, but make it <em>basketball</em>.</h1>
+        <p>Kids learn fractions and percentages by reading real-style player stats. Short, game-like lessons for grades 1–5.</p>
+        <div class="cta">
+          <button class="btn" id="startBtn">Play the free lesson</button>
+          <small>About 10 minutes</small>
+        </div>
+      </div>
+      <aside class="statcard" aria-label="Example stat card">
+        <div class="tag">Tonight's box score</div>
+        <div class="name">Maya Brooks · #7</div>
+        <div class="statrow"><span>Free throws made</span><b>6</b></div>
+        <div class="statrow"><span>Free throws tried</span><b>8</b></div>
+        <div class="statrow"><span>Free throw %</span><b>?</b></div>
+        <div class="math">6 out of 8 = 6/8 = 75%</div>
+      </aside>
+    </section>
+
+    <section class="sec">
+      <h2>How a lesson works</h2>
+      <div class="grid3">
+        <div class="feat"><div class="ico" style="background:var(--sky-soft);color:var(--sky-ink)">1</div><h3>Meet the stat</h3><p>Coach Hoop explains one idea using a player's game, in plain words.</p></div>
+        <div class="feat"><div class="ico" style="background:var(--court-soft);color:var(--court)">2</div><h3>Take the shots</h3><p>Tap to make or miss shots and watch the fraction and percent change.</p></div>
+        <div class="feat"><div class="ico" style="background:var(--win-soft);color:var(--win)">3</div><h3>Quiz time</h3><p>Five quick questions with friendly hints. Every right answer earns a star.</p></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2>The season</h2>
+      <div class="lessonlist">
+        <div class="lrow free"><div class="num">1</div><div class="t"><b>Free Throw Fractions</b><span>Made shots out of tried shots · Grades 3–4</span></div><button class="btn" style="font-size:1rem;min-height:44px;padding:8px 18px" id="startBtn2">Play</button></div>
+        <div class="lrow"><div class="num">2</div><div class="t"><b>From Fractions to Percents</b><span>Turning x/10 and x/100 into % · Grades 4–5</span></div><span class="soon">Coming soon</span></div>
+        <div class="lrow"><div class="num">3</div><div class="t"><b>Points Per Game</b><span>Adding and averaging scores · Grades 3–5</span></div><span class="soon">Coming soon</span></div>
+        <div class="lrow"><div class="num">4</div><div class="t"><b>Rebound Showdown</b><span>Comparing bigger and smaller numbers · Grades 1–2</span></div><span class="soon">Coming soon</span></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="parent">
+        <h3>For grown-ups</h3>
+        <p>Lessons follow California math standards for fractions (3.NF) and decimals and percents (4.NF). Lesson 1 is free and needs no account. Progress is saved in this browser only.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- LESSON -->
+  <main id="lesson" hidden>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+    <section class="stage" id="stage" aria-live="polite"></section>
+  </main>
+</div>
+<canvas class="confetti" id="confetti" hidden></canvas>
+
+<script>
+const coachSVG = `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="var(--court)"/><path d="M3 32h58M32 3v58" stroke="#7C2D12" stroke-width="2.5" fill="none" opacity=".55"/><circle cx="23" cy="27" r="4.5" fill="#fff"/><circle cx="41" cy="27" r="4.5" fill="#fff"/><circle cx="24" cy="28" r="2.2" fill="#0F2A3D"/><circle cx="42" cy="28" r="2.2" fill="#0F2A3D"/><path d="M22 40c5 6 15 6 20 0" stroke="#0F2A3D" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+const ballSVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#fff" opacity=".0"/><path d="M3 20h34M20 3v34M8 8c6 6 6 18 0 24M32 8c-6 6-6 18 0 24" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`;
+const xSVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M12 12l16 16M28 12L12 28" stroke="var(--miss)" stroke-width="4" stroke-linecap="round"/></svg>`;
+const starSVG = on => `<svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .9-5.1 4.9 1.3 7L12 18l-6.2 3.3 1.3-7L2 9.4l7-.9z" fill="${on?'var(--court)':'var(--line)'}"/></svg>`;
+const coach = html => `<div class="coach">${coachSVG}<div class="bubble">${html}</div></div>`;
+
+const QUIZ = [
+  {q:"Jalen tried <b>5</b> free throws and made <b>4</b>. What fraction did he make?", opts:["4/5","5/4","1/5","4/9"], a:0,
+   why:"Made goes on top, tried goes on the bottom: 4 made out of 5 tried is 4/5."},
+  {q:"Rosa made <b>7 out of 10</b> shots. What is her shooting percentage?", opts:["7%","17%","70%","10%"], a:2,
+   why:"Out of 10, each shot is worth 10%. 7 × 10% = 70%."},
+  {q:"Which player shot better?<br>Ava: <b>3/4</b> &nbsp;·&nbsp; Ben: <b>2/4</b>", opts:["Ava","Ben","Same","Can't tell"], a:0,
+   why:"Both tried 4 shots. Ava made 3 and Ben made 2, so Ava shot better."},
+  {q:"Coach says Leo made <b>half</b> of his 8 free throws. How many did he make?", opts:["2","4","6","8"], a:1,
+   why:"Half means 1/2. Half of 8 is 4, so 4/8 = 1/2."},
+  {q:"Maya made <b>9 out of 10</b>. How many did she <b>miss</b>?", opts:["9","10","1","19"], a:2,
+   why:"She tried 10 and made 9. 10 − 9 = 1 miss."}
+];
+
+let state = {step:0, shots:Array(10).fill(null), demo:[1,1,1,0], qi:0, picked:null, score:0, answers:[]};
+const STEPS = ["intro","meet","vocab","try","quiz","done"];
+const $ = id => document.getElementById(id);
+
+function save(){ try{ localStorage.setItem("ps-best", JSON.stringify({best:Math.max(state.score, load().best||0)})) }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem("ps-best"))||{} }catch(e){ return {} } }
+
+function show(view){
+  $("home").hidden = view!=="home"; $("lesson").hidden = view!=="lesson";
+  window.scrollTo({top:0});
+}
+function startLesson(){ state = {step:0, shots:Array(10).fill(null), demo:[1,1,1,0], qi:0, picked:null, score:0, answers:[]}; show("lesson"); render(); }
+$("startBtn").onclick = startLesson; $("startBtn2").onclick = startLesson; $("homeBtn").onclick = () => show("home");
+
+function renderProgress(){
+  const total = 4 + QUIZ.length; // intro, meet, vocab, try + quiz
+  const at = state.step < 4 ? state.step : state.step===4 ? 4 + state.qi : total;
+  $("progress").innerHTML = Array.from({length:total},(_,i)=>`<i class="${i<=at?'on':''}"></i>`).join("");
+}
+const navRow = (back, nextLabel, nextDisabled) =>
+  `<div class="nav">${back?`<button class="btn ghost" data-act="back">Back</button>`:`<span></span>`}<button class="btn" data-act="next" ${nextDisabled?'disabled':''}>${nextLabel}</button></div>`;
+const fracHTML = (n,d) => `<span class="frac"><span>${n}</span><span class="bar"></span><span>${d}</span></span>`;
+
+function render(){
+  renderProgress();
+  const s = STEPS[state.step], st = $("stage");
+  st.className = "stage";
+  if(s==="intro"){
+    st.innerHTML = `<h2>Lesson 1: Free Throw Fractions</h2>
+      ${coach(`Hi, I'm <b>Coach Hoop</b>! Today you'll learn how basketball players keep score of their shots, using <b>fractions</b>. Ready to warm up?`)}
+      ${navRow(false,"Let's go!")}`;
+  }
+  if(s==="meet"){
+    const made = state.demo.filter(Boolean).length;
+    st.innerHTML = `<h2>Maya's free throws</h2>
+      ${coach(`Maya stepped up to the line <b>4 times</b>. She made <b>3</b> and missed <b>1</b>. We can write that as a fraction!`)}
+      <div class="balls">${state.demo.map(m=>`<div class="ball ${m?'made':'miss'}">${m?ballSVG:xSVG}</div>`).join("")}</div>
+      <div class="readout">
+        <div><div class="lbl">Made</div>${fracHTML(made,4)}<div class="lbl">Tried</div></div>
+      </div>
+      <p class="hint">Made goes on top. Tried goes on the bottom.</p>
+      ${navRow(true,"Got it")}`;
+  }
+  if(s==="vocab"){
+    st.innerHTML = `<h2>Two words to know</h2>
+      ${coach(`Every fraction has a top number and a bottom number. Here's what they mean on the court.`)}
+      <div class="vocab">
+        <div><b>Numerator (top)</b><span>Shots she <em>made</em>. In 3/4, that's 3.</span></div>
+        <div><b>Denominator (bottom)</b><span>Shots she <em>tried</em>. In 3/4, that's 4.</span></div>
+      </div>
+      ${navRow(true,"Next")}`;
+  }
+  if(s==="try"){
+    const tried = state.shots.filter(x=>x!==null).length, made = state.shots.filter(x=>x===true).length;
+    st.innerHTML = `<h2>Your turn: take 10 shots</h2>
+      ${coach(`Tap each ball: <b>once</b> to make it, <b>again</b> to miss, <b>again</b> to reset. Watch the fraction change. Out of 10 shots, each make is worth <b>10%</b>!`)}
+      <div class="balls">${state.shots.map((v,i)=>`<button class="ball ${v===true?'made':v===false?'miss':''}" data-shot="${i}" aria-label="Shot ${i+1}: ${v===true?'made':v===false?'missed':'not taken'}">${v===true?ballSVG:v===false?xSVG:`<span style="font-weight:800;color:var(--muted)">${i+1}</span>`}</button>`).join("")}</div>
+      <div class="readout">
+        <div><div class="lbl">Made / tried</div>${fracHTML(made, tried||"–")}</div>
+        <span class="eq">→</span>
+        <div><div class="lbl">Out of 10</div>${fracHTML(made,10)}</div>
+        <span class="eq">=</span>
+        <div><div class="lbl">Percent</div><div class="pct">${made*10}%</div></div>
+      </div>
+      <p class="hint">${tried<10?`Take all 10 shots to unlock the quiz (${tried}/10).`:made===10?"Perfect game! 10/10 is 100%.":`Nice! You made ${made} out of 10.`}</p>
+      ${navRow(true,"Start the quiz", tried<10)}`;
+  }
+  if(s==="quiz"){
+    const q = QUIZ[state.qi], p = state.picked;
+    st.innerHTML = `<div class="qhead"><span>Question ${state.qi+1} of ${QUIZ.length}</span><span class="stars">${QUIZ.map((_,i)=>starSVG(state.answers[i])).join("")}</span></div>
+      <h2 style="font-size:clamp(1.3rem,3.6vw,1.7rem)">${q.q}</h2>
+      <div class="opts">${q.opts.map((o,i)=>`<button class="opt ${p!==null&&i===q.a?'right':''} ${p===i&&i!==q.a?'wrong':''}" data-opt="${i}" ${p!==null?'disabled':''}>${o}</button>`).join("")}</div>
+      ${p===null?`<p class="hint">Pick an answer.</p>`:
+        `<div class="feedback ${p===q.a?'good':'bad'}">${p===q.a?"Swish! That's right.":"Not quite. Here's how it works:"}<span>${q.why}</span></div>`}
+      <div class="nav"><span></span><button class="btn" data-act="next" ${p===null?'disabled':''}>${state.qi<QUIZ.length-1?"Next question":"See my score"}</button></div>`;
+  }
+  if(s==="done"){
+    const sc = state.score, best = load().best||sc;
+    st.className = "stage done";
+    st.innerHTML = `<svg class="badge" viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="64" fill="var(--court-soft)"/><circle cx="70" cy="70" r="48" fill="var(--court)"/><path d="M22 70h96M70 22v96M36 36c14 14 14 54 0 68M104 36c-14 14-14 54 0 68" stroke="#7C2D12" stroke-width="3" fill="none" opacity=".45"/><text x="70" y="80" text-anchor="middle" font-family="Baloo 2,system-ui" font-weight="800" font-size="30" fill="#fff">${sc}/${QUIZ.length}</text></svg>
+      <div class="big">${sc===5?"All-Star!":sc>=3?"Great game!":"Good practice!"}</div>
+      <div class="stars" aria-label="${sc} of ${QUIZ.length} stars">${QUIZ.map((_,i)=>starSVG(state.answers[i])).join("")}</div>
+      ${coach(sc===5?`A perfect <b>5/5</b>. As a percent that's <b>100%</b>, just like a perfect free throw night!`:`You got <b>${sc} out of 5</b>. That's a fraction too: <b>${sc}/5</b>! Play again to beat it.`)}
+      <p class="hint">Best score on this device: ${best}/5. More lessons are coming soon.</p>
+      <div class="nav" style="justify-content:center"><button class="btn ghost" data-act="home">Back to home</button><button class="btn" data-act="replay">Play again</button></div>`;
+    if(sc>=3) confetti();
+  }
+}
+
+$("stage").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b || b.disabled) return;
+  if(b.dataset.shot!==undefined){
+    const i=+b.dataset.shot, v=state.shots[i];
+    state.shots[i] = v===null ? true : v===true ? false : null;
+    render(); document.querySelector(`[data-shot="${i}"]`)?.classList.add("pop");
+    document.querySelector(`[data-shot="${i}"]`)?.focus(); return;
+  }
+  if(b.dataset.opt!==undefined && state.picked===null){
+    state.picked = +b.dataset.opt;
+    const ok = state.picked===QUIZ[state.qi].a; state.answers[state.qi]=ok; if(ok) state.score++;
+    render(); return;
+  }
+  const act = b.dataset.act;
+  if(act==="back"){ state.step--; render(); }
+  if(act==="next"){
+    if(STEPS[state.step]==="quiz"){
+      if(state.qi<QUIZ.length-1){ state.qi++; state.picked=null; }
+      else { save(); state.step++; }
+    } else state.step++;
+    render(); window.scrollTo({top:0,behavior:"smooth"});
+  }
+  if(act==="home") show("home");
+  if(act==="replay") startLesson();
+});
+
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c=$("confetti"), x=c.getContext("2d"); c.hidden=false;
+  c.width=innerWidth; c.height=innerHeight;
+  const cols=["#F97316","#0EA5E9","#16A34A","#FACC15"];
+  const ps=Array.from({length:120},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,s:6+Math.random()*6,r:Math.random()*6,c:cols[Math.random()*4|0]}));
+  let t=0;(function f(){x.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()});
+    if(++t<180)requestAnimationFrame(f);else{c.hidden=true}})();
+}
+</script>
+</body>
+</html>
